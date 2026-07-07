@@ -1,0 +1,106 @@
+openapi: 3.0.1
+info:
+  title: Books App API
+  description: REST API for managing persons and their books.
+  contact:
+    name: API Support
+  license:
+    name: Proprietary
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+  description: Local development
+paths:
+  /persons:
+    get:
+      tags:
+      - Persons
+      summary: List all persons
+      operationId: list
+      responses:
+        "200":
+          description: Persons returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PersonResponse"
+    post:
+      tags:
+      - Persons
+      summary: Create a person with optional books
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePersonRequest"
+        required: true
+      responses:
+        "201":
+          description: Person created successfully
+components:
+  schemas:
+    BookResponse:
+      required:
+      - isbn
+      - title
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+        title:
+          type: string
+        isbn:
+          type: string
+    CreateBookRequest:
+      required:
+      - isbn
+      - title
+      type: object
+      properties:
+        title:
+          minLength: 1
+          type: string
+        isbn:
+          minLength: 1
+          type: string
+    CreatePersonRequest:
+      required:
+      - books
+      - firstName
+      - lastName
+      type: object
+      properties:
+        firstName:
+          minLength: 1
+          type: string
+        lastName:
+          minLength: 1
+          type: string
+        books:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateBookRequest"
+    PersonResponse:
+      required:
+      - books
+      - firstName
+      - lastName
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+        firstName:
+          type: string
+        lastName:
+          type: string
+        books:
+          type: array
+          items:
+            $ref: "#/components/schemas/BookResponse"

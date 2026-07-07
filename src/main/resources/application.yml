@@ -1,0 +1,27 @@
+micronaut:
+  application:
+    name: Books Application
+
+datasources:
+  default:
+    url: ${DATASOURCE_URL:`jdbc:postgresql://localhost:5432/app_db`}
+    driverClassName: org.postgresql.Driver
+    username: ${DATASOURCE_USERNAME:app_user}
+    password: ${DATASOURCE_PASSWORD:app_password}
+    dialect: POSTGRES
+    schema-generate: NONE
+
+flyway:
+  datasources:
+    default:
+      enabled: true
+
+jpa:
+  default:
+    entity-scan:
+      packages:
+        - cz.cablo.books.domain
+    properties:
+      hibernate:
+        hbm2ddl.auto: none
+        show_sql: true
