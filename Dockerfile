@@ -17,6 +17,7 @@ COPY build.gradle.kts settings.gradle.kts gradlew ./
 COPY src/ src/
 
 # Build the production-ready optimized shadow/distribution jar
+RUN chmod +x gradlew
 RUN ./gradlew installDist -x test --no-daemon
 
 # ==========================================
