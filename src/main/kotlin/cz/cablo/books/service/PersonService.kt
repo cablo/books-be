@@ -5,35 +5,41 @@ import cz.cablo.books.api.CreatePersonRequest
 import cz.cablo.books.api.PersonResponse
 import cz.cablo.books.domain.Book
 import cz.cablo.books.domain.Person
+import cz.cablo.books.repository.BookRepository
 import cz.cablo.books.repository.PersonRepository
 import io.micronaut.transaction.annotation.Transactional
 import jakarta.inject.Singleton
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 
 @Singleton
 open class PersonService(
     private val personRepository: PersonRepository,
+    private val bookRepository: BookRepository,
 ) {
     @Transactional
-    open fun create(request: CreatePersonRequest): PersonResponse {
-        val person = Person(
-            firstName = request.firstName,
-            lastName = request.lastName,
+    open suspend fun create(request: CreatePersonRequest): PersonResponse {
+        val person = personRepository.save(
+            Person(
+                firstName = request.firstName,
+                lastName = request.lastName,
+            )
         )
-
-        request.books.forEach { bookRequest ->
-            person.addBook(
+        val books = request.books.map { bookRequest ->
+            bookRepository.save(
                 Book(
                     title = bookRequest.title,
                     isbn = bookRequest.isbn,
-                ),
+                    personId = person.id,
+                )
             )
         }
-
-        return personRepository.save(person).toResponse()
+        return person.copy(books = books).toResponse()
     }
 
     @Transactional(readOnly = true)
-    open fun findAll(): List<PersonResponse> = personRepository.findAll().map { it.toResponse() }
+    open suspend fun findAll(): List<PersonResponse> =
+        personRepository.findAll().map { it.toResponse() }.toList()
 
     private fun Person.toResponse(): PersonResponse =
         PersonResponse(

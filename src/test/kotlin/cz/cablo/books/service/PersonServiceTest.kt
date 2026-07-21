@@ -1,29 +1,33 @@
 package cz.cablo.books.service
 
-import  cz.cablo.books.api.CreateBookRequest
-import  cz.cablo.books.api.CreatePersonRequest
-import  cz.cablo.books.domain.Book
-import  cz.cablo.books.domain.Person
-import  cz.cablo.books.repository.PersonRepository
+import cz.cablo.books.api.CreateBookRequest
+import cz.cablo.books.api.CreatePersonRequest
+import cz.cablo.books.domain.Book
+import cz.cablo.books.domain.Person
+import cz.cablo.books.repository.BookRepository
+import cz.cablo.books.repository.PersonRepository
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class PersonServiceTest {
 
-    // Vytvoření mocku pomocí MockK
-    private val repository: PersonRepository = mockk()
-    private val service = PersonService(repository)
+    private val personRepository: PersonRepository = mockk()
+    private val bookRepository: BookRepository = mockk()
+    private val service = PersonService(personRepository, bookRepository)
 
     @Test
-    fun `create maps request to PersonResponse with all fields`() {
-        val saved = Person(id = 1L, firstName = "Jan", lastName = "Novak").also {
-            it.addBook(Book(id = 10L, title = "Kotlin in Action", isbn = "978-1617293290"))
-        }
-        // Každé chování definujeme pomocí "every" a "returns"
-        every { repository.save(any()) } returns saved
+    fun `create maps request to PersonResponse with all fields`() = runBlocking {
+        val savedPerson = Person(id = 1L, firstName = "Jan", lastName = "Novak")
+        val savedBook = Book(id = 10L, title = "Kotlin in Action", isbn = "978-1617293290", personId = 1L)
+
+        coEvery { personRepository.save(any()) } returns savedPerson
+        coEvery { bookRepository.save(any()) } returns savedBook
 
         val response = service.create(
             CreatePersonRequest(
@@ -45,12 +49,13 @@ class PersonServiceTest {
     }
 
     @Test
-    fun `create with multiple books maps all books to response`() {
-        val saved = Person(id = 1L, firstName = "Jan", lastName = "Novak").also {
-            it.addBook(Book(id = 10L, title = "Book A", isbn = "ISBN-A"))
-            it.addBook(Book(id = 11L, title = "Book B", isbn = "ISBN-B"))
-        }
-        every { repository.save(any()) } returns saved
+    fun `create with multiple books maps all books to response`() = runBlocking {
+        val savedPerson = Person(id = 1L, firstName = "Jan", lastName = "Novak")
+        coEvery { personRepository.save(any()) } returns savedPerson
+        coEvery { bookRepository.save(match { it.title == "Book A" }) } returns
+            Book(id = 10L, title = "Book A", isbn = "ISBN-A", personId = 1L)
+        coEvery { bookRepository.save(match { it.title == "Book B" }) } returns
+            Book(id = 11L, title = "Book B", isbn = "ISBN-B", personId = 1L)
 
         val response = service.create(
             CreatePersonRequest(
@@ -69,8 +74,8 @@ class PersonServiceTest {
     }
 
     @Test
-    fun `create with no books returns response with empty books list`() {
-        every { repository.save(any()) } returns Person(id = 2L, firstName = "Eva", lastName = "Novakova")
+    fun `create with no books returns response with empty books list`() = runBlocking {
+        coEvery { personRepository.save(any()) } returns Person(id = 2L, firstName = "Eva", lastName = "Novakova")
 
         val response = service.create(CreatePersonRequest(firstName = "Eva", lastName = "Novakova"))
 
@@ -79,8 +84,8 @@ class PersonServiceTest {
     }
 
     @Test
-    fun `findAll returns mapped response for each person`() {
-        every { repository.findAll() } returns listOf(
+    fun `findAll returns mapped response for each person`() = runBlocking {
+        every { personRepository.findAll() } returns flowOf(
             Person(id = 1L, firstName = "Jan", lastName = "Novak"),
             Person(id = 2L, firstName = "Eva", lastName = "Novakova"),
         )
@@ -95,8 +100,8 @@ class PersonServiceTest {
     }
 
     @Test
-    fun `findAll returns empty list when no persons exist`() {
-        every { repository.findAll() } returns emptyList()
+    fun `findAll returns empty list when no persons exist`() = runBlocking {
+        every { personRepository.findAll() } returns flowOf()
 
         val result = service.findAll()
 

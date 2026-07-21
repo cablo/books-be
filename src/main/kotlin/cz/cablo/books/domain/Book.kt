@@ -1,29 +1,15 @@
 package cz.cablo.books.domain
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.Table
+import io.micronaut.data.annotation.GeneratedValue
+import io.micronaut.data.annotation.Id
+import io.micronaut.data.annotation.MappedEntity
 
-@Entity
-@Table(name = "book")
-class Book(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null,
-
-    @Column(nullable = false)
-    var title: String,
-
-    @Column(nullable = false)
-    var isbn: String,
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "person_id", nullable = false)
-    var author: Person? = null,
+@MappedEntity("book")
+data class Book(
+    @field:Id
+    @field:GeneratedValue(GeneratedValue.Type.IDENTITY)
+    val id: Long? = null,
+    val title: String,
+    val isbn: String,
+    val personId: Long? = null,
 )

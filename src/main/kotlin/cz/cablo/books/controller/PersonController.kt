@@ -21,11 +21,11 @@ open class PersonController(
     @Get
     @Operation(summary = "List all persons")
     @ApiResponse(responseCode = "200", description = "Persons returned successfully")
-    fun list(): List<PersonResponse> = personService.findAll()
+    suspend fun list(): List<PersonResponse> = personService.findAll()
 
     @Post
     @Operation(summary = "Create a person with optional books")
     @ApiResponse(responseCode = "201", description = "Person created successfully")
-    open fun create(@Body @Valid request: CreatePersonRequest): HttpResponse<PersonResponse> =
+    open suspend fun create(@Body @Valid request: CreatePersonRequest): HttpResponse<PersonResponse> =
         HttpResponse.created(personService.create(request))
 }
