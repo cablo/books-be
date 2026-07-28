@@ -14,9 +14,9 @@ datasources:
 r2dbc:
   datasources:
     default:
-      url: ${R2DBC_URL:`r2dbc:postgresql://localhost:5432/app_db`}
-      username: ${DATASOURCE_USERNAME:app_user}
-      password: ${DATASOURCE_PASSWORD:app_password}
+      url: ${R2DBC_DATASOURCE_URL:`r2dbc:postgresql://localhost:5432/app_db`}
+      username: ${R2DBC_DATASOURCE_USERNAME:app_user}
+      password: ${R2DBC_DATASOURCE_PASSWORD:app_password}
 
 flyway:
   datasources:
