@@ -56,7 +56,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Show pushed tags
+      - name: Show pushed tags ==================================
         run: |
           echo "=================================="
           echo "Docker Image Created with Tag:"
